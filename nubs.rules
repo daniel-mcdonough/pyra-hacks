@@ -1,0 +1,3 @@
+KERNELS=="input*", SUBSYSTEMS=="input", ATTRS{name}=="nub0", RUN+="/bin/sh -c 'echo absolute > /proc/pandora/nub0/mode' "
+KERNELS=="input*", SUBSYSTEMS=="input", ATTRS{name}=="nub1", RUN+="/bin/sh -c 'echo absolute > /proc/pandora/nub1/mode' "
+

@@ -1,0 +1,21 @@
+pyra-hacks (0.30) unstable; urgency=medium
+
+  [ aTc ]
+  * update version number so the package replaces the old one
+  * fix lintian complaints
+  * Update changelog for 0.29 release
+
+ -- Pyra Dev <pyra-dev@pyra-handheld.com>  Thu, 10 Oct 2019 16:16:06 +0200
+
+pyra-hacks (0.29) stretch; urgency=medium
+
+  [ aTc ]
+  * fix lintian complaints
+
+ -- Pyra Dev <pyra-dev@pyra-handheld.com>  Thu, 10 Oct 2019 16:15:42 +0200
+
+pyra-hacks (0.28) stretch; urgency=medium
+
+  * Initial Release.
+
+ -- Pyra Dev <pyra-dev@pyra-handheld.com>  Wed, 24 Jul 2019 13:31:13 +0200

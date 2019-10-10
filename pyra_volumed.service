@@ -1,0 +1,12 @@
+[Unit]
+Description=Pyra Volume Daemon
+Documentation=https://dev.pyra-handheld.com/packages/pyra-hacks
+
+[Service]
+ExecStart=/usr/bin/pyra_volumed
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+Alias=pyra_volumed.service

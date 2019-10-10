@@ -1,0 +1,14 @@
+Source: pyra-hacks
+Section: misc
+Priority: optional
+Maintainer: Pyra Dev <dev@pyra-handheld.com>
+Build-Depends: debhelper (>= 9), dh-systemd, systemd, libasound2-dev,
+ libiio-dev
+Standards-Version: 3.9.8
+Homepage: http://dev.pyra-handheld.com/packages/pyra-hacks.git
+
+Package: pyra-hacks
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libasound2, libiio0
+Description: Some hacks to quickly get around a few problems
+ These things should be properly fixed at some stage.
