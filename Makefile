@@ -3,7 +3,7 @@ CFLAGS = -Wall -O2 -ggdb
 TOPDIR	= $(shell pwd)
 export TOPDIR
 
-TARGETS = pyra_volumed
+TARGETS = pyra_volumed femtocom
 
 
 .PHONY: all install clean
@@ -22,4 +22,5 @@ install:
 	install -d "$(DESTDIR)/lib/systemd/system"
 	install -m 644 -t "$(DESTDIR)/lib/systemd/system/" "$(TOPDIR)/pyra_volumed.service"
 	install -d "$(DESTDIR)/lib/udev/rules.d/"
-	install -m 644 -t "$(DESTDIR)/lib/udev/rules.d/" "$(TOPDIR)/nubs.rules"	
+	install -m 644 -t "$(DESTDIR)/lib/udev/rules.d/" "$(TOPDIR)/nubs.rules"
+	install -m 755 -t "$(DESTDIR)/usr/bin" "$(TOPDIR)/femtocom"

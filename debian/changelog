@@ -1,3 +1,11 @@
+pyra-hacks (0.32) unstable; urgency=medium
+
+  [ aTc ]
+  * pyra-thermal: run every 20 seconds
+  * add pyra-wwan: power off modem at shutdown
+
+ -- Pyra Dev <pyra-dev@pyra-handheld.com>  Tue, 22 Dec 2020 00:33:21 +0100
+
 pyra-hacks (0.31) unstable; urgency=medium
 
   [ aTc ]

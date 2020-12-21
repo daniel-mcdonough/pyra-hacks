@@ -1,2 +1,4 @@
 pyra-thermal.sh /usr/share/pyra/scripts/
 pyra-thermal.service /lib/systemd/system/
+pyra-wwan.service /lib/systemd/system/
+wwan-off /usr/share/pyra/scripts/

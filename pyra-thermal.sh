@@ -3,7 +3,7 @@
 
 maxFreq=1500
 maxCharge=3000000
-interval=1
+interval=20
 
 setMaxFreq()
 {
