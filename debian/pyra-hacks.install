@@ -1,0 +1,2 @@
+pyra-thermal.sh /usr/share/pyra/scripts/
+pyra-thermal.service /lib/systemd/system/

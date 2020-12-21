@@ -1,0 +1,12 @@
+[Unit]
+Description=Pyra Thermal Daemon
+Documentation=https://dev.pyra-handheld.com/packages/pyra-hacks
+
+[Service]
+ExecStart=/usr/share/pyra/scripts/pyra-thermal.sh daemon
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+Alias=pyra-thermal.service
