@@ -1,9 +1,12 @@
 #!/bin/sh
 # Read core and battery temp and pick approperiate cpu freq and charging rates
 
+interval=20
+core="core_thermal"
+battery="bq27421-0"
+
 maxFreq=1500
 maxCharge=3000000
-interval=20
 
 setMaxFreq()
 {
@@ -24,61 +27,65 @@ setMaxCharge()
 doThermal()
 {
 
+        core_temp=$(cat "${core_dev}")
+        battery_temp=$(cat "${battery_dev}")
+        
 	#Check Core, from hottest to coldest
-	if [ $core -gt 97000 ]
+	if [ ${core_temp} -gt 97000 ]
 	then
        		setMaxFreq 250
-	elif [ $core -gt 92000 ]
+	elif [ ${core_temp} -gt 92000 ]
 	then
         	setMaxFreq 500
-	elif [ $core -gt 87000 ]
+	elif [ ${core_temp} -gt 87000 ]
 	then
         	setMaxFreq 750
-	elif [ $core -gt 82000 ]
+	elif [ ${core_temp} -gt 82000 ]
 	then
         	setMaxFreq 1000
-	elif [ $core -gt 77000 ]
+	elif [ ${core_temp} -gt 77000 ]
 	then
         	setMaxFreq 1250
 	fi
 
 	#Check Battery, from hottest to coldest
-	if [ $battery -gt 50000 ]
+	if [ ${battery_temp} -gt 50000 ]
 	then
         	setMaxFreq 250
         	setMaxCharge 500000
-	elif [ $battery -gt 49000 ]
+	elif [ ${battery_temp} -gt 49000 ]
 	then
         	setMaxFreq 500
         	setMaxCharge 500000
-	elif [ $battery -gt 47000 ]
+	elif [ ${battery_temp} -gt 47000 ]
 	then
         	setMaxFreq 750
         	setMaxCharge 500000
-	elif [ $battery -gt 45000 ]
+	elif [ ${battery_temp} -gt 45000 ]
 	then
         	setMaxFreq 1000
         	setMaxCharge 500000
-	elif [ $battery -gt 44000 ]
+	elif [ ${battery_temp} -gt 44000 ]
 	then
         	setMaxFreq 1250
         	setMaxCharge 500000
-	elif [ $battery -gt 43000 ]
+	elif [ ${battery_temp} -gt 43000 ]
 	then
         	setMaxCharge 1000000
-	elif [ $battery -gt 42000 ]
+	elif [ ${battery_temp} -gt 42000 ]
 	then
         	setMaxCharge 2000000
 	fi
 
+        if [ "$daemon" -eq 0 ]
+        then
+                echo ${core}:${core_temp} ${battery}:${battery_temp}
+                echo MaxFreq: ${maxFreq} MaxCharge: ${maxCharge}
+        fi
 
-	if [ $# -eq 0 ]
-	then
-        	cpufreq-set -u ${maxFreq}MHz
-        	echo ${maxCharge} > /dev/usb_max_current
-	else
-        	echo "Would set cpu to ${maxFreq}mhz and battery limit to ${maxCharge}"
-	fi
+       	cpufreq-set -u ${maxFreq}MHz
+       	echo ${maxCharge} > /dev/usb_max_current
+       	
 }
 
 if [ "$1" = "daemon" ]
@@ -89,19 +96,34 @@ else
 	daemon=0
 fi
 
+for i in /sys/class/thermal/thermal_zone*
+do
+    name=$(cat ${i}/type)
+    if [ "${name}" = "${core}" ]
+    then
+        core_dev="${i}/temp"
+    fi
+    
+    if [ "${name}" = "${battery}" ]
+    then
+        battery_dev="${i}/temp"
+    fi    
+done
 
-core=$1
-battery=$2
-
-if [ -z "$core" ]
+if [ -z "${core_dev}" ]
 then
-        core=$(cat /sys/class/thermal/thermal_zone2/temp)
+        echo could not find ${core}
+        exit 1
 fi
 
-if [ -z "$battery" ]
+if [ -z "${battery_dev}" ]
 then
-        battery=$(cat /sys/class/thermal/thermal_zone3/temp)
+        echo could not find ${battery}
+        exit 1
 fi
+
+#echo $core_dev
+#echo $battery_dev
 
 if [ "$daemon" -eq 1 ]
 then

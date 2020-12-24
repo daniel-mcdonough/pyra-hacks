@@ -1,3 +1,10 @@
+pyra-hacks (0.33) unstable; urgency=medium
+
+  [ aTc ]
+  * pyra-thermal: make it actually do something
+
+ -- Pyra Dev <pyra-dev@pyra-handheld.com>  Thu, 24 Dec 2020 05:10:07 +0100
+
 pyra-hacks (0.32) unstable; urgency=medium
 
   [ aTc ]
