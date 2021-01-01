@@ -12,7 +12,7 @@ setMaxFreq()
 {
         if [ "$1" -lt "$maxFreq" ]
         then
-                maxFreq=$1
+                current_maxFreq=$1
         fi
 }
 
@@ -20,12 +20,15 @@ setMaxCharge()
 {
         if [ "$1" -lt "$maxCharge" ]
         then
-                maxCharge=$1
+                current_maxCharge=$1
         fi
 }
 
 doThermal()
 {
+
+	current_maxFreq=${maxFreq}
+	current_maxCharge=${maxCharge}
 
         core_temp=$(cat "${core_dev}")
         battery_temp=$(cat "${battery_dev}")
@@ -80,11 +83,11 @@ doThermal()
         if [ "$daemon" -eq 0 ]
         then
                 echo ${core}:${core_temp} ${battery}:${battery_temp}
-                echo MaxFreq: ${maxFreq} MaxCharge: ${maxCharge}
+                echo MaxFreq: ${current_maxFreq} MaxCharge: ${current_maxCharge}
         fi
 
-       	cpufreq-set -u ${maxFreq}MHz
-       	echo ${maxCharge} > /dev/usb_max_current
+       	cpufreq-set -u ${current_maxFreq}MHz
+       	echo ${current_maxCharge} > /dev/usb_max_current
        	
 }
 
