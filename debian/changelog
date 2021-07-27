@@ -1,3 +1,10 @@
+pyra-hacks (0.35) unstable; urgency=medium
+
+  [ aTc ]
+  * pyra_volumed: dynamically increase delay between wheel readings to reduce cpu usage
+
+ -- Pyra Dev <pyra-dev@pyra-handheld.com>  Wed, 28 Jul 2021 00:26:48 +0200
+
 pyra-hacks (0.34) unstable; urgency=medium
 
   [ aTc ]

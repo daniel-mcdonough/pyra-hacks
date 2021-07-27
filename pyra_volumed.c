@@ -18,6 +18,11 @@
 
 #define SELEM "Handsfree"
 
+#define MIN_DELAY 100000
+#define MAX_DELAY 1000000
+
+
+
 int main(int argc,char **argv)
 {
     struct iio_context *ctx;
@@ -27,7 +32,7 @@ int main(int argc,char **argv)
     long min,max;
     snd_mixer_t *handle;
     snd_mixer_selem_id_t *sid;
-
+    int delay=MIN_DELAY;
 
     snd_mixer_open(&handle,0);
     snd_mixer_attach(handle,CARD);
@@ -62,9 +67,15 @@ int main(int argc,char **argv)
                     {
                         snd_mixer_selem_set_playback_volume_all(elem, volume);
                         pv=volume;
+			delay=MIN_DELAY;
                     }
-	            //printf("%f : %f : %d \n",val,raw,volume);
-                usleep(100000);	
+		else
+		    {
+		     delay+=delay/10;
+		     if (delay > MAX_DELAY) delay=MAX_DELAY;
+		    }
+	            //printf("i:%f : r:%f : v:%d d:%d\n",val,raw,volume,delay);
+                usleep(delay);	
             }  
         }
 
