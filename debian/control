@@ -1,11 +1,11 @@
 Source: pyra-hacks
 Section: misc
 Priority: optional
-Maintainer: Pyra Dev <dev@pyra-handheld.com>
-Build-Depends: debhelper (>= 9), dh-systemd, systemd, libasound2-dev,
- libiio-dev
-Standards-Version: 3.9.8
-Homepage: http://dev.pyra-handheld.com/packages/pyra-hacks.git
+Maintainer: Pyra Dev <pyra-dev@pyra-handheld.com>
+Build-Depends: debhelper-compat (= 13), libasound2-dev, libiio-dev
+Standards-Version: 4.5.1
+Rules-Requires-Root: no
+Homepage: https://dev.pyra-handheld.com/packages/pyra-hacks.git
 
 Package: pyra-hacks
 Architecture: any
