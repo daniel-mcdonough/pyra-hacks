@@ -9,6 +9,6 @@ Homepage: https://dev.pyra-handheld.com/packages/pyra-hacks.git
 
 Package: pyra-hacks
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libasound2, libiio0
+Depends: ${shlibs:Depends}, ${misc:Depends}, libasound2t64, libiio0
 Description: Some hacks to quickly get around a few problems
  These things should be properly fixed at some stage.
