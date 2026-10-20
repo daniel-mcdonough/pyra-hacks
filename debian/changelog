@@ -1,3 +1,18 @@
+pyra-hacks (0.38+pyra1) unstable; urgency=medium
+
+  * Local build of the Pyra port's integration branch, not an upstream
+    release. Each change is on its own branch off the imported 0.38:
+  * pyra-thermal.sh: set the ceiling through scaling_max_freq; cpufreq-set
+    is not in trixie and every cycle failed (feature/thermal-cap).
+  * pyra-thermal.sh: throttle on the SoC sensors, not the fuel gauge; add
+    hysteresis; take the lower of the two ladders; poll every 2 s; read
+    cpu_thermal as well as core_thermal (feature/thermal-ladder).
+  * pyra_volumed: map the wheel through its measured taper, so equal turns
+    are equal steps in dB; calibration in /etc/pyra_volumed.conf
+    (feature/volumed-taper).
+
+ -- daniel-mcdonough <daniel-mcdonough@users.noreply.github.com>  Tue, 20 Oct 2026 17:59:13 -0400
+
 pyra-hacks (0.38) unstable; urgency=medium
 
   [ aTc ]
