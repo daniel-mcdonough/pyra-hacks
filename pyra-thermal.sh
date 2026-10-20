@@ -86,7 +86,15 @@ doThermal()
                 echo MaxFreq: ${current_maxFreq} MaxCharge: ${current_maxCharge}
         fi
 
-       	cpufreq-set -u ${current_maxFreq}MHz
+	# cpufreq-set came from cpufrequtils, which is not in
+	# trixie and has no candidate version, so this call failed on every
+	# cycle since the first boot and the daemon never capped anything.
+	# Writing scaling_max_freq is what cpufreq-set -u did, and needs
+	# nothing installed. Both cores share one policy on this SoC.
+	for _policy in /sys/devices/system/cpu/cpufreq/policy*; do
+		[ -w "$_policy/scaling_max_freq" ] || continue
+		echo $((current_maxFreq * 1000)) > "$_policy/scaling_max_freq"
+	done
        	echo ${current_maxCharge} > /dev/usb_max_current
        	
 }
