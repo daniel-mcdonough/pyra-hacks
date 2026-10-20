@@ -1,7 +1,7 @@
 #!/bin/sh
 # Read core and battery temp and pick approperiate cpu freq and charging rates
 
-# interval was 20, which cannot control
+# pyra-thermal-ladder: was interval=20, which cannot control
 # this machine. Measured: two cores from a 63 C idle reach the
 # 100 C passive trip in 16 seconds, so a 20 second poll arrives
 # after the trip rather than before it. With the vendor ladder
@@ -42,11 +42,12 @@ doThermal()
         core_temp=$(cat "${core_dev}")
         battery_temp=$(cat "${battery_dev}")
         
-	# The ladder below replaces the vendor's. Two changes; the
-	# measurements behind them are in the commit that made them.
+	# pyra-thermal-ladder: the ladder below replaces the vendor's. Two
+	# changes, both explained in full in the script that applied this.
 	#
 	# 1. The sensor the vendor calls the battery is bq27421-0, the fuel
-	#    gauge, and it reports the gauge's own die temperature — the mainboard it is
+	#    gauge, and it
+	#    reports the gauge's own die temperature — the mainboard it is
 	#    soldered to, not the cell. It rises 2.0 C within ten seconds of one
 	#    core being loaded, which no 6000 mAh cell can do. The vendor's rungs
 	#    for it start at 44 C, which one core reaches in half a minute, so
@@ -225,7 +226,7 @@ doThermal()
                 echo MaxFreq: ${current_maxFreq} MaxCharge: ${current_maxCharge}
         fi
 
-	# cpufreq-set came from cpufrequtils, which is not in
+	# pyra-thermal-fix: cpufreq-set came from cpufrequtils, which is not in
 	# trixie and has no candidate version, so this call failed on every
 	# cycle since the first boot and the daemon never capped anything.
 	# Writing scaling_max_freq is what cpufreq-set -u did, and needs
