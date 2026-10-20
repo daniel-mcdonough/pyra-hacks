@@ -13,7 +13,7 @@ all: $(TARGETS)
 clean:
 	$(RM) $(TARGETS)
 
-pyra_volumed: LDLIBS+= -lasound -liio
+pyra_volumed: LDLIBS+= -lasound -liio -lm
 
 
 install:
