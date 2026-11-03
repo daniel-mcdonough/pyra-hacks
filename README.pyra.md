@@ -30,6 +30,11 @@ file) last. That is the branch that gets built:
 The packaging commit is never part of a feature branch, so it never shows
 up in a patch.
 
+A last local commit adds `.github/workflows/build.yml`, which runs the same
+cross build on every push to `pyra`. Pushing a tag that names the
+changelog's version, such as `v0.38+pyra1`, publishes the debs as a
+release; the workflow fails if the tag and `debian/changelog` disagree.
+
 The thermal branches carry the output of dragonbox-pyra's
 `device/pyra-thermal-fix.sh` and `device/pyra-thermal-ladder.sh`
 (`--emit-patched`) applied to the 0.38 script. Those scripts, and the

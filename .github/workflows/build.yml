@@ -1,0 +1,85 @@
+# Cross-builds the armhf debs on every push to pyra, and publishes them as a
+# release for a tag like v0.38+pyra1. This file exists only on pyra: main is
+# the rebuilt upstream history and each feature branch is a patch for
+# upstream, so neither carries it, and tags on main (v0.30 to v0.38) never
+# trigger it.
+name: build
+
+on:
+  push:
+    branches: [pyra]
+    tags: ['v*\+pyra*']   # \+: a bare + is a quantifier in GitHub's filters
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: debian:trixie
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      # There are no tests, and a cross build could not run them.
+      DEB_BUILD_OPTIONS: nocheck
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: src
+
+      # The same steps as build_pyra_hacks in dragonbox-pyra's
+      # pc/pyra-crossbuild.sh.
+      - name: Install the cross toolchain and build dependencies
+        run: |
+          dpkg --add-architecture armhf
+          apt-get update -qq
+          apt-get install -y --no-install-recommends \
+            build-essential crossbuild-essential-armhf dpkg-dev devscripts
+          cd src
+          apt-get build-dep -y -a armhf .
+
+      # A release tag must name the version debian/changelog builds, or the
+      # release would be labelled with one version and carry another.
+      - name: Check the tag against debian/changelog
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          version=$(dpkg-parsechangelog -l src/debian/changelog -S Version)
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "tag $GITHUB_REF_NAME, but debian/changelog is $version" >&2
+            exit 1
+          fi
+
+      - name: Build
+        run: |
+          cd src
+          dpkg-buildpackage -aarmhf -us -uc -b -j"$(nproc)"
+          # The entry's bullets, without the control-format header lines.
+          dpkg-parsechangelog -S Changes | tail -n +4 > ../release-notes.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: debs
+          path: |
+            *.deb
+            release-notes.txt
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: debs
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" *.deb \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "pyra-hacks ${GITHUB_REF_NAME#v}" \
+            --notes-file release-notes.txt
