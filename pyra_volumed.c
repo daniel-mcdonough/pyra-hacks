@@ -10,13 +10,24 @@
 //
 // So the reading is turned back into wheel travel through calibration points
 // taken at quarter turns, interpolating in log(raw) between them, and travel
-// is spread evenly over step_lo..step_hi. Both can be overridden for a unit
-// whose pot reads differently, in /etc/pyra_volumed.conf:
+// is spread evenly over step_lo..step_hi.
+//
+// The headphones follow the same wheel. Headset Playback Volume (0..15 =
+// -30..0 dB in 2 dB steps) is set from the same travel, over its whole range
+// by default, on every turn and whichever output is playing: each control
+// sits behind its own codec route, so the one not playing is silent anyway,
+// and nothing here needs to know which that is. The control has no mute, so
+// the bottom of the wheel is -30 dB on the headphones, not silence.
+//
+// All of it can be overridden for a unit whose pot reads differently, in
+// /etc/pyra_volumed.conf:
 //
 //     # raw readings at 0, 1/4, 1/2, 3/4 and full travel
 //     cal 16 144 394 1071 2068
-//     # control steps the wheel spans (6 = -40 dB, 29 = +6 dB)
+//     # speaker control steps the wheel spans (6 = -40 dB, 29 = +6 dB)
 //     range 6 29
+//     # headphone control steps the wheel spans (0 = -30 dB, 15 = 0 dB)
+//     hsrange 0 15
 //
 // Read a calibration point by holding the wheel still and reading
 // /sys/bus/iio/devices/iio:deviceN/in_voltage2_raw (the N whose name is
@@ -37,7 +48,9 @@
 
 #define CARD "hw:CARD=L15"
 
-#define SELEM "Handsfree"
+// speakers, then headphones
+#define NOUT 2
+static const char *selem[NOUT]={"Handsfree","Headset"};
 
 #define MIN_DELAY 100000
 #define MAX_DELAY 1000000
@@ -47,7 +60,7 @@
 
 // measured on one unit, 2026-10-20
 static double cal[NCAL]={16,144,394,1071,2068};
-static long step_lo=6, step_hi=29;
+static long step_lo[NOUT]={6,0}, step_hi[NOUT]={29,15};
 
 // readings this close to the bottom are "all the way down": volume 0
 #define RAW_OFF (cal[0]*1.25)
@@ -56,7 +69,7 @@ static long step_lo=6, step_hi=29;
 // move once the wheel is this far past the edge of the current step
 #define HYSTERESIS 0.3
 
-static void read_config(long max)
+static void read_config(const long *max)
 {
     FILE *f=fopen(CONFIG,"r");
     char line[256];
@@ -76,15 +89,23 @@ static void read_config(long max)
             else
                 fprintf(stderr,"pyra_volumed: %s: cal must be positive and rising, ignored\n",CONFIG);
         }
-        else if(sscanf(line," range %ld %ld",&lo,&hi)==2)
+        else
         {
-            if(lo>=0 && lo<hi && hi<=max)
+            int o=-1;
+            if(sscanf(line," range %ld %ld",&lo,&hi)==2)
+                o=0;
+            else if(sscanf(line," hsrange %ld %ld",&lo,&hi)==2)
+                o=1;
+            if(o<0)
+                continue;
+            if(lo>=0 && lo<hi && hi<=max[o])
             {
-                step_lo=lo;
-                step_hi=hi;
+                step_lo[o]=lo;
+                step_hi[o]=hi;
             }
             else
-                fprintf(stderr,"pyra_volumed: %s: range must be 0 <= lo < hi <= %ld, ignored\n",CONFIG,max);
+                fprintf(stderr,"pyra_volumed: %s: %s must be 0 <= lo < hi <= %ld, ignored\n",
+                        CONFIG,o?"hsrange":"range",max[o]);
         }
     }
     fclose(f);
@@ -101,12 +122,12 @@ static double travel(double raw)
     return 1;
 }
 
-// where the wheel is, in fractional control steps
-static double position(double raw)
+// where the wheel is, in fractional steps of output o's control
+static double position(int o,double raw)
 {
     if(raw<=RAW_OFF)
         return 0;
-    return step_lo+travel(raw)*(step_hi-step_lo);
+    return step_lo[o]+travel(raw)*(step_hi[o]-step_lo[o]);
 }
 
 
@@ -117,7 +138,8 @@ int main(int argc,char **argv)
     ctx=iio_create_default_context();
 
 
-    long min,max;
+    long min,max[NOUT];
+    snd_mixer_elem_t *elem[NOUT];
     snd_mixer_t *handle;
     snd_mixer_selem_id_t *sid;
     int delay=MIN_DELAY;
@@ -127,12 +149,21 @@ int main(int argc,char **argv)
     snd_mixer_selem_register(handle,NULL,NULL);
     snd_mixer_load(handle);
     snd_mixer_selem_id_alloca(&sid);
-    snd_mixer_selem_id_set_index(sid, 0);
-    snd_mixer_selem_id_set_name(sid, SELEM);
-    snd_mixer_elem_t* elem = snd_mixer_find_selem(handle, sid);
-    snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
-    if(step_hi>max)
-        step_hi=max;
+    for(int o=0;o<NOUT;o++)
+    {
+        snd_mixer_selem_id_set_index(sid, 0);
+        snd_mixer_selem_id_set_name(sid, selem[o]);
+        elem[o] = snd_mixer_find_selem(handle, sid);
+        max[o]=0;
+        if(elem[o])
+            snd_mixer_selem_get_playback_volume_range(elem[o], &min, &max[o]);
+        else
+            fprintf(stderr,"pyra_volumed: no %s control on %s\n",selem[o],CARD);
+        if(step_hi[o]>max[o])
+            step_hi[o]=max[o];
+        if(step_lo[o]>step_hi[o])
+            step_lo[o]=step_hi[o];
+    }
     read_config(max);
     
 
@@ -148,19 +179,27 @@ int main(int argc,char **argv)
             const char *attraw=iio_channel_find_attr(ch,"raw");
             double val;
             double raw;
-            long pv=-1;
+            long pv[NOUT]={-1,-1};
             while(true)
             { 
                 //iio_channel_attr_read_double(ch,attr,&val);
                 iio_channel_attr_read_double(ch,attraw,&raw);
-                double pos=position(raw);
-                long volume=lround(pos);
-                if(pv<0 || (volume!=pv && fabs(pos-pv)>0.5+HYSTERESIS))
+                int moved=0;
+                for(int o=0;o<NOUT;o++)
+                {
+                    double pos=position(o,raw);
+                    long volume=lround(pos);
+                    if(!elem[o])
+                        continue;
+                    if(pv[o]<0 || (volume!=pv[o] && fabs(pos-pv[o])>0.5+HYSTERESIS))
                     {
-                        snd_mixer_selem_set_playback_volume_all(elem, volume);
-                        pv=volume;
-			delay=MIN_DELAY;
+                        snd_mixer_selem_set_playback_volume_all(elem[o], volume);
+                        pv[o]=volume;
+                        moved=1;
                     }
+                }
+                if(moved)
+		    delay=MIN_DELAY;
 		else
 		    {
 		     delay+=delay/10;
