@@ -17,7 +17,7 @@ send upstream:
 | --- | --- | --- |
 | `feature/thermal-cap` | apply the ceiling through `scaling_max_freq`; `cpufreq-set` is not in trixie | fix 6 |
 | `feature/thermal-ladder` | the ladder's five decision faults; on top of `thermal-cap` | fix 7 |
-| `feature/volumed-taper` | the volume wheel through its measured taper, calibration in `/etc/pyra_volumed.conf` | fix 12 |
+| `feature/volumed-taper` | the volume wheel through its measured taper, and driving the headphones as well as the speakers; calibration in `/etc/pyra_volumed.conf` | fix 12 |
 
 `pyra` merges all of them, then adds two local commits: one that puts back
 the marker comments dragonbox-pyra's device scripts use to recognise an
@@ -32,7 +32,7 @@ up in a patch.
 
 A last local commit adds `.github/workflows/build.yml`, which runs the same
 cross build on every push to `pyra`. Pushing a tag that names the
-changelog's version, such as `v0.38+pyra1`, publishes the debs as a
+changelog's version, such as `v0.38+pyra2`, publishes the debs as a
 release; the workflow fails if the tag and `debian/changelog` disagree.
 
 The thermal branches carry the output of dragonbox-pyra's
