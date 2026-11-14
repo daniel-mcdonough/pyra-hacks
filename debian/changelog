@@ -1,3 +1,11 @@
+pyra-hacks (0.38+pyra3) unstable; urgency=medium
+
+  * pyra_volumed: give "all the way down" its own band in raw units, so
+    a wheel resting at the bottom no longer flips between 0 and the
+    range's lo several times a second (feature/volumed-taper).
+
+ -- daniel-mcdonough <daniel-mcdonough@users.noreply.github.com>  Sat, 14 Nov 2026 13:16:38 -0500
+
 pyra-hacks (0.38+pyra2) unstable; urgency=medium
 
   * pyra_volumed: set the headphone volume (Headset Playback Volume) from
