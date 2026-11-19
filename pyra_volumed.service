@@ -2,11 +2,16 @@
 Description=Pyra Volume Daemon
 Documentation=https://dev.pyra-handheld.com/packages/pyra-hacks
 After=alsa-restore.service
+# Gives up after 30 failed starts in 2 minutes (no card on this kernel).
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 ExecStart=/usr/bin/pyra_volumed
 KillMode=process
 Restart=on-failure
+# pyra_volumed exits while the card or the ADC isn't there yet.
+RestartSec=2
 
 [Install]
 WantedBy=sound.target
