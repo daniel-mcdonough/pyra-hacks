@@ -1,3 +1,12 @@
+pyra-hacks (0.38+pyra4) unstable; urgency=medium
+
+  * pyra_volumed: exit with an error when the sound card or the wheel's
+    ADC isn't there yet, and restart every 2 s (up to 30 times), so a
+    daemon started before the card registered no longer leaves the wheel
+    dead for the whole boot (feature/volumed-taper).
+
+ -- daniel-mcdonough <daniel-mcdonough@users.noreply.github.com>  Thu, 19 Nov 2026 12:37:11 -0500
+
 pyra-hacks (0.38+pyra3) unstable; urgency=medium
 
   * pyra_volumed: give "all the way down" its own band in raw units, so

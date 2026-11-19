@@ -17,7 +17,7 @@ send upstream:
 | --- | --- | --- |
 | `feature/thermal-cap` | apply the ceiling through `scaling_max_freq`; `cpufreq-set` is not in trixie | fix 6 |
 | `feature/thermal-ladder` | the ladder's five decision faults; on top of `thermal-cap` | fix 7 |
-| `feature/volumed-taper` | the volume wheel through its measured taper, and driving the headphones as well as the speakers; calibration in `/etc/pyra_volumed.conf` | fix 12 |
+| `feature/volumed-taper` | the volume wheel through its measured taper, and driving the headphones as well as the speakers; retrying until the card is there at boot; calibration in `/etc/pyra_volumed.conf` | fix 12 |
 
 `pyra` merges all of them, then adds two local commits: one that puts back
 the marker comments dragonbox-pyra's device scripts use to recognise an
