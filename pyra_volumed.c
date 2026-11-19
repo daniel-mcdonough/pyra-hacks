@@ -171,10 +171,24 @@ int main(int argc,char **argv)
         if(step_lo[o]>step_hi[o])
             step_lo[o]=step_hi[o];
     }
+    // At boot the service can start before the card has registered. Exit
+    // with an error then, so systemd starts us again once it's there,
+    // rather than polling the wheel forever with nothing to set.
+    int found=0;
+    for(int o=0;o<NOUT;o++)
+        found+=elem[o]!=NULL;
+    if(!found)
+    {
+        fprintf(stderr,"pyra_volumed: no volume controls on %s yet\n",CARD);
+        snd_mixer_close(handle);
+        if(ctx)
+            iio_context_destroy(ctx);
+        return 1;
+    }
     read_config(max);
     
 
-    const struct iio_device *dev=iio_context_find_device(ctx,DEVNAME);
+    const struct iio_device *dev=ctx?iio_context_find_device(ctx,DEVNAME):NULL;
     if(dev)
     {
         //printf("found device\n");
@@ -227,9 +241,13 @@ int main(int argc,char **argv)
 
     }
 
-iio_context_destroy(ctx);
+// Only reached without the wheel's ADC (also possible early at boot): fail,
+// so systemd tries again.
+fprintf(stderr,"pyra_volumed: no %s channel %s\n",DEVNAME,CHANNEL);
+if(ctx)
+    iio_context_destroy(ctx);
 snd_mixer_close(handle);
 
-return 0;
+return 1;
 }
 
