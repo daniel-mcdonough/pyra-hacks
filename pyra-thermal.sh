@@ -17,6 +17,37 @@ battery="bq27421-0"
 maxFreq=1500
 maxCharge=3000000
 
+# A ceiling the user sets, in MHz, as CPU_MAX_MHZ=1000 in this file. The
+# daemon rewrites scaling_max_freq on every pass, so a limit written there
+# by hand is gone within one interval; this is where it goes instead. Read
+# on every pass, so a change applies within one interval, no restart. The
+# ladder still caps below it when hot and never goes above it. The package
+# does not ship the file: no file, or no valid line, means no ceiling. A
+# value that is not a plain number from 1 to 9999 is ignored, one above the
+# top step changes nothing, and the kernel rounds the rest down to a step.
+pyraCeilingConf=/etc/default/pyra-thermal
+pyraTopFreq=${maxFreq}
+
+pyraReadCeiling()
+{
+	maxFreq=${pyraTopFreq}
+	[ -r "${pyraCeilingConf}" ] || return 0
+	# The second test keeps a last line that has no newline.
+	while IFS='= 	' read -r _pyra_k _pyra_v _pyra_rest || [ -n "${_pyra_k}" ]
+	do
+		[ "${_pyra_k}" = "CPU_MAX_MHZ" ] || continue
+		_pyra_v=${_pyra_v#[\"\']}
+		_pyra_v=${_pyra_v%[\"\']}
+		case "${_pyra_v}" in
+		''|0*|*[!0-9]*|?????*) continue ;;
+		esac
+		if [ "${_pyra_v}" -lt "${maxFreq}" ]
+		then
+			maxFreq=${_pyra_v}
+		fi
+	done < "${pyraCeilingConf}"
+}
+
 setMaxFreq()
 {
         if [ "$1" -lt "$maxFreq" ]
@@ -36,6 +67,7 @@ setMaxCharge()
 doThermal()
 {
 
+	pyraReadCeiling
 	current_maxFreq=${maxFreq}
 	current_maxCharge=${maxCharge}
 
