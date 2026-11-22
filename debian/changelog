@@ -1,3 +1,12 @@
+pyra-hacks (0.38+pyra5) unstable; urgency=medium
+
+  * pyra-thermal.sh: keep a CPU ceiling the user sets as CPU_MAX_MHZ in
+    /etc/default/pyra-thermal (not shipped). The daemon starts each pass
+    from it instead of 1500 MHz, still caps lower when hot, and reads it
+    every 2 s without sourcing it (feature/thermal-ceiling).
+
+ -- daniel-mcdonough <daniel-mcdonough@users.noreply.github.com>  Sun, 22 Nov 2026 03:14:30 -0500
+
 pyra-hacks (0.38+pyra4) unstable; urgency=medium
 
   * pyra_volumed: exit with an error when the sound card or the wheel's
