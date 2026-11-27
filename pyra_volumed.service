@@ -14,4 +14,8 @@ Restart=on-failure
 RestartSec=2
 
 [Install]
-WantedBy=sound.target
+# udev pulls in sound.target when the card appears at boot, and nothing else
+# does, so after "systemctl rescue" and "systemctl default" the daemon would
+# stay stopped. multi-user.target brings it back; started before the card,
+# it retries (above).
+WantedBy=sound.target multi-user.target
