@@ -1,3 +1,12 @@
+pyra-hacks (0.38+pyra6) unstable; urgency=medium
+
+  * pyra_volumed.service: wanted by multi-user.target as well as
+    sound.target, so the wheel comes back after "systemctl rescue" and
+    "systemctl default"; only udev pulled in sound.target, at boot
+    (feature/volumed-taper).
+
+ -- daniel-mcdonough <daniel-mcdonough@users.noreply.github.com>  Fri, 27 Nov 2026 16:58:41 -0500
+
 pyra-hacks (0.38+pyra5) unstable; urgency=medium
 
   * pyra-thermal.sh: keep a CPU ceiling the user sets as CPU_MAX_MHZ in
